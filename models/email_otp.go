@@ -4,53 +4,29 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-
-	"github.com/jainritik/email-otp/utils"
 )
 
 type EmailOTP struct {
-	GeneratedOTPs map[string]string
+	otpMap map[string]string
 }
 
 func NewEmailOTP() *EmailOTP {
 	return &EmailOTP{
-		GeneratedOTPs: make(map[string]string),
+		otpMap: make(map[string]string),
 	}
 }
 
-func (e *EmailOTP) GenerateOTPEmail(userEmail string, emailService *utils.EmailService) string {
-	if !emailService.IsValidEmail(userEmail) {
-		return "STATUS_EMAIL_INVALID"
-	}
-
-	otp := e.generateOTP()
-	e.GeneratedOTPs[userEmail] = otp
-
-	emailBody := fmt.Sprintf("Your OTP Code is %s. The code is valid for 1 minute.", otp)
-	emailService.SendEmail(userEmail, emailBody)
-
-	return "STATUS_EMAIL_OK"
-}
-
-func (e *EmailOTP) CheckOTP(userEmail, userOTP string) string {
-	if otp, ok := e.GeneratedOTPs[userEmail]; ok {
-		if userOTP == otp {
-			delete(e.GeneratedOTPs, userEmail)
-			return "STATUS_OTP_OK"
-		}
-	}
-
-	return "STATUS_OTP_FAIL"
-}
-
-func (e *EmailOTP) generateOTP() string {
+func (eo *EmailOTP) GenerateOTP() string {
 	rand.Seed(time.Now().UnixNano())
-	digits := "0123456789"
+	otp := fmt.Sprintf("%06d", rand.Intn(1000000))
+	return otp
+}
 
-	otp := make([]byte, 6)
-	for i := 0; i < 6; i++ {
-		otp[i] = digits[rand.Intn(len(digits))]
+func (eo *EmailOTP) ValidateOTP(email, otp string) bool {
+	storedOTP, ok := eo.otpMap[email]
+	if !ok {
+		return false
 	}
-
-	return string(otp)
+	delete(eo.otpMap, email)
+	return storedOTP == otp
 }

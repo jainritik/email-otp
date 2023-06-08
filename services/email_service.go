@@ -1,26 +1,19 @@
 package services
 
 import (
-	"github.com/jainritik/email-otp/models"
-	"github.com/jainritik/email-otp/utils"
+	"fmt"
 )
 
-type EmailOTPService struct {
-	emailOTPModel *models.EmailOTP
-	emailService  *utils.EmailService
+type EmailService struct {
+	// Email sending service implementation
 }
 
-func NewEmailOTPService() *EmailOTPService {
-	return &EmailOTPService{
-		emailOTPModel: models.NewEmailOTP(),
-		emailService:  utils.NewEmailService(),
-	}
+func NewEmailService() *EmailService {
+	return &EmailService{}
 }
 
-func (s *EmailOTPService) GenerateOTPEmail(userEmail string) string {
-	return s.emailOTPModel.GenerateOTPEmail(userEmail, s.emailService)
-}
-
-func (s *EmailOTPService) CheckOTP(userEmail, userOTP string) string {
-	return s.emailOTPModel.CheckOTP(userEmail, userOTP)
+func (es *EmailService) SendEmail(email, otp string) error {
+	// Implement the email sending functionality here
+	fmt.Printf("Sending email to %s with OTP: %s\n", email, otp)
+	return nil
 }
