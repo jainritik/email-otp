@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/yourusername/email-otp/controllers"
+	"github.com/jainritik/email-otp/controllers"
 )
 
 func main() {

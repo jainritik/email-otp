@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/yourusername/email-otp/services"
+	"github.com/jainritik/email-otp/services"
 )
 
 type EmailOTPController struct {

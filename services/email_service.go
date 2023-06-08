@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/jainritik/email-otp/models"
-	"github.com/yourusername/email-otp/utils"
+	"github.com/jainritik/email-otp/utils"
 )
 
 type EmailOTPService struct {

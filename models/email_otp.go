@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/yourusername/email-otp/utils"
+	"github.com/jainritik/email-otp/utils"
 )
 
 type EmailOTP struct {
