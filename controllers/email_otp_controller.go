@@ -1,58 +1,73 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/jainritik/email-otp/models"
 	"github.com/jainritik/email-otp/services"
 	"github.com/jainritik/email-otp/utils"
 )
 
-const (
-	STATUS_EMAIL_OK      = 1
-	STATUS_EMAIL_FAIL    = 2
-	STATUS_EMAIL_INVALID = 3
-	STATUS_OTP_OK        = 1
-	STATUS_OTP_FAIL      = 2
-	STATUS_OTP_TIMEOUT   = 3
-)
-
 type EmailOTPController struct {
-	emailOTPModel  *models.EmailOTP
-	emailService   *services.EmailService
-	emailValidator *utils.EmailValidator
+	emailService services.EmailService
+	otpGenerator utils.OTPGenerator
+	otpStorage   models.OTPStorage
 }
 
 func NewEmailOTPController() *EmailOTPController {
 	return &EmailOTPController{
-		emailOTPModel:  models.NewEmailOTP(),
-		emailService:   services.NewEmailService(),
-		emailValidator: utils.NewEmailValidator(),
+		emailService: services.NewEmailService(),
+		otpGenerator: utils.NewOTPGenerator(),
+		otpStorage:   models.NewOTPStorage(),
 	}
 }
 
-func (ec *EmailOTPController) GenerateOTP(email string) int {
-	if !ec.emailValidator.ValidateEmail(email) {
-		return STATUS_EMAIL_INVALID
+func (controller *EmailOTPController) GenerateOTP(userEmail string) utils.StatusCode {
+	// Validate email address
+	if !utils.ValidateEmail(userEmail) {
+		return utils.STATUS_EMAIL_INVALID
 	}
 
-	otp := ec.emailOTPModel.GenerateOTP()
+	// Check if email domain is allowed
+	if !utils.IsEmailDomainAllowed(userEmail) {
+		return utils.STATUS_EMAIL_INVALID
+	}
 
-	err := ec.emailService.SendEmail(email, otp)
+	// Generate OTP
+	otp := controller.otpGenerator.GenerateOTP()
+
+	// Store OTP with user's email
+	controller.otpStorage.StoreOTP(userEmail, otp)
+
+	// Send OTP email
+	emailBody := fmt.Sprintf("Your OTP code is %s. The code is valid for 1 minute.", otp)
+	err := controller.emailService.SendEmail(userEmail, emailBody)
 	if err != nil {
-		return STATUS_EMAIL_FAIL
+		return utils.STATUS_EMAIL_FAIL
 	}
 
-	return STATUS_EMAIL_OK
+	return utils.STATUS_EMAIL_OK
 }
 
-func (ec *EmailOTPController) ValidateOTP(email, otp string) int {
-	if !ec.emailValidator.ValidateEmail(email) {
-		return STATUS_EMAIL_INVALID
+func (controller *EmailOTPController) CheckOTP(userEmail, enteredOTP string) utils.StatusCode {
+	// Validate email address
+	if !utils.ValidateEmail(userEmail) {
+		return utils.STATUS_OTP_FAIL
 	}
 
-	valid := ec.emailOTPModel.ValidateOTP(email, otp)
-	if !valid {
-		return STATUS_OTP_FAIL
+	// Check if email domain is allowed
+	if !utils.IsEmailDomainAllowed(userEmail) {
+		return utils.STATUS_OTP_FAIL
 	}
 
-	return STATUS_OTP_OK
+	// Retrieve OTP for the user's email
+	storedOTP := controller.otpStorage.GetOTP(userEmail)
+
+	// Compare entered OTP with stored OTP
+	if storedOTP == enteredOTP {
+		// Clear stored OTP after successful verification
+		controller.otpStorage.ClearOTP(userEmail)
+		return utils.STATUS_OTP_OK
+	}
+
+	return utils.STATUS_OTP_FAIL
 }

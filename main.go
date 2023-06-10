@@ -3,33 +3,34 @@ package main
 import (
 	"fmt"
 	"github.com/jainritik/email-otp/controllers"
+	"github.com/jainritik/email-otp/utils"
 )
 
 func main() {
-	// Create an instance of the EmailOTPController
 	emailOTPController := controllers.NewEmailOTPController()
 
-	// Generate OTP and validate email
-	email := "user@example.com"
-	status := emailOTPController.GenerateOTP(email)
-
-	if status == controllers.STATUS_EMAIL_OK {
-		fmt.Println("OTP generated and sent successfully")
-	} else {
-		fmt.Println("Failed to generate OTP")
+	// Generate OTP and send email
+	userEmail := "tester1@dso.org.sg"
+	status := emailOTPController.GenerateOTP(userEmail)
+	switch status {
+	case utils.STATUS_EMAIL_OK:
+		fmt.Println("OTP has been sent to the email address.")
+	case utils.STATUS_EMAIL_INVALID:
+		fmt.Println("Invalid email address.")
+	case utils.STATUS_EMAIL_FAIL:
+		fmt.Println("Failed to send email. Please try again later.")
 	}
 
-	// Validate OTP
-	otp := "123456"
-	status = emailOTPController.ValidateOTP(email, otp)
-
-	if status == controllers.STATUS_OTP_OK {
-		fmt.Println("OTP validation successful")
-	} else if status == controllers.STATUS_OTP_FAIL {
-		fmt.Println("OTP validation failed")
-	} else if status == controllers.STATUS_OTP_TIMEOUT {
-		fmt.Println("OTP validation timeout")
-	} else {
-		fmt.Println("Unknown OTP validation status")
+	// Check OTP entered by the user
+	fmt.Println("Please enter the OTP received in your email:")
+	enteredOTP := utils.ReadOTP()
+	status = emailOTPController.CheckOTP(userEmail, enteredOTP)
+	switch status {
+	case utils.STATUS_OTP_OK:
+		fmt.Println("OTP verification successful.")
+	case utils.STATUS_OTP_FAIL:
+		fmt.Println("Incorrect OTP. Please try again.")
+	case utils.STATUS_OTP_TIMEOUT:
+		fmt.Println("OTP verification timeout.")
 	}
 }

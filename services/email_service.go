@@ -4,16 +4,17 @@ import (
 	"fmt"
 )
 
-type EmailService struct {
-	// Email sending service implementation
+type EmailService struct{}
+
+// NewEmailService creates a new instance of EmailService
+func NewEmailService() EmailService {
+	return EmailService{}
 }
 
-func NewEmailService() *EmailService {
-	return &EmailService{}
-}
-
-func (es *EmailService) SendEmail(email, otp string) error {
-	// Implement the email sending functionality here
-	fmt.Printf("Sending email to %s with OTP: %s\n", email, otp)
+// SendEmail sends an email to the given address
+func (es EmailService) SendEmail(email, body string) error {
+	// Implementation for sending email
+	fmt.Println("Sending email to:", email)
+	fmt.Println("Email body:", body)
 	return nil
 }
