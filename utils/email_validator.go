@@ -1,9 +1,6 @@
 package utils
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"regexp"
 	"strings"
 )
@@ -33,11 +30,4 @@ func ValidateEmail(email string) bool {
 func IsEmailDomainAllowed(email string) bool {
 	allowedDomain := "@dso.org.sg"
 	return strings.HasSuffix(email, allowedDomain)
-}
-func ReadOTP() string {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter OTP: ")
-	otp, _ := reader.ReadString('\n')
-	otp = strings.TrimSpace(otp)
-	return otp
 }
