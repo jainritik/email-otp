@@ -3,13 +3,21 @@ package main
 import (
 	"fmt"
 	"github.com/jainritik/email-otp/controllers"
+	"github.com/jainritik/email-otp/models"
+	"github.com/jainritik/email-otp/services"
 	"github.com/jainritik/email-otp/utils"
 	"os"
 	"time"
 )
 
 func main() {
-	emailOTPController := controllers.NewEmailOTPController()
+	// Create instances of the required dependencies
+	emailService := services.NewEmailService()
+	otpGenerator := utils.NewOTPGenerator()
+	otpStorage := models.NewOTPStorage()
+
+	// Create an instance of EmailOTPController with the dependencies
+	emailOTPController := controllers.NewEmailOTPController(emailService, otpGenerator, otpStorage)
 
 	// Read user email address
 	var userEmail string

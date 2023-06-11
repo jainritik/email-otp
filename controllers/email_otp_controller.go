@@ -9,21 +9,43 @@ import (
 	"time"
 )
 
+//type EmailOTPController struct {
+//	emailService services.EmailServiceInterface
+//	otpGenerator utils.OTPGeneratorInterface
+//	otpStorage   models.OTPStorageInterface
+//	tries        map[string]int
+//	timer        *time.Timer
+//}
+//
+//func NewEmailOTPController(emailService services.EmailServiceInterface, otpGenerator utils.OTPGeneratorInterface, otpStorage models.OTPStorageInterface) *EmailOTPController {
+//	return &EmailOTPController{
+//		emailService: emailService,
+//		otpGenerator: otpGenerator,
+//		otpStorage:   otpStorage,
+//		tries:        make(map[string]int),
+//	}
+//}
+
 type EmailOTPController struct {
-	emailService services.EmailService
-	otpGenerator utils.OTPGenerator
-	otpStorage   models.OTPStorage
+	emailService services.EmailServiceInterface
+	otpGenerator utils.OTPGeneratorInterface
+	otpStorage   models.OTPStorageInterface
 	tries        map[string]int
 	timer        *time.Timer
 }
 
-func NewEmailOTPController() *EmailOTPController {
+func NewEmailOTPController(emailService services.EmailServiceInterface, otpGenerator utils.OTPGeneratorInterface, otpStorage models.OTPStorageInterface) *EmailOTPController {
 	return &EmailOTPController{
-		emailService: services.NewEmailService(),
-		otpGenerator: utils.NewOTPGenerator(),
-		otpStorage:   models.NewOTPStorage(),
+		emailService: emailService,
+		otpGenerator: otpGenerator,
+		otpStorage:   otpStorage,
 		tries:        make(map[string]int),
 	}
+}
+
+type EmailOTPControllerInterface interface {
+	GenerateOTP(userEmail string) utils.StatusCode
+	CheckOTP(userEmail string, enteredOTP string) utils.StatusCode
 }
 
 func (controller *EmailOTPController) GenerateOTP(userEmail string) utils.StatusCode {
@@ -80,6 +102,20 @@ func (controller *EmailOTPController) CheckOTP(userEmail, enteredOTP string) uti
 		return utils.STATUS_OTP_FAIL
 	}
 
+	// Increment the tries counter
+	controller.tries[userEmail]++
+
+	// Check if maximum tries exceeded
+	if controller.tries[userEmail] >= 10 {
+		err := controller.otpStorage.ClearOTP(userEmail)
+		if err != nil {
+			log.Printf("Error clearing OTP after maximum tries: %v", err)
+			return utils.STATUS_OTP_FAIL
+		}
+		controller.stopTimer(userEmail)
+		return utils.STATUS_OTP_FAIL
+	}
+
 	// Retrieve OTP, its creation time, and existence status for the user's email
 	storedOTP, createTime, exists, err := controller.otpStorage.GetOTP(userEmail)
 	if err != nil {
@@ -90,6 +126,18 @@ func (controller *EmailOTPController) CheckOTP(userEmail, enteredOTP string) uti
 	// Check if OTP exists
 	if !exists {
 		return utils.STATUS_OTP_FAIL
+	}
+
+	// Check if OTP has expired
+	elapsed := time.Since(createTime)
+	if elapsed > time.Minute {
+		err = controller.otpStorage.ClearOTP(userEmail)
+		if err != nil {
+			log.Printf("Error clearing expired OTP: %v", err)
+			return utils.STATUS_OTP_FAIL
+		}
+		controller.stopTimer(userEmail)
+		return utils.STATUS_OTP_TIMEOUT
 	}
 
 	// Normalize entered OTP by removing leading zeros
@@ -105,32 +153,6 @@ func (controller *EmailOTPController) CheckOTP(userEmail, enteredOTP string) uti
 		}
 		controller.stopTimer(userEmail)
 		return utils.STATUS_OTP_OK
-	}
-
-	// Check if OTP has expired
-	elapsed := time.Since(createTime)
-	if elapsed > time.Minute {
-		err = controller.otpStorage.ClearOTP(userEmail)
-		if err != nil {
-			log.Printf("Error clearing expired OTP: %v", err)
-			return utils.STATUS_OTP_FAIL
-		}
-		controller.stopTimer(userEmail)
-		return utils.STATUS_OTP_TIMEOUT
-	}
-
-	// Increment the tries counter
-	controller.tries[userEmail]++
-
-	// Check if maximum tries exceeded
-	if controller.tries[userEmail] >= 10 {
-		err = controller.otpStorage.ClearOTP(userEmail)
-		if err != nil {
-			log.Printf("Error clearing OTP after maximum tries: %v", err)
-			return utils.STATUS_OTP_FAIL
-		}
-		controller.stopTimer(userEmail)
-		return utils.STATUS_OTP_FAIL
 	}
 
 	// Reset the timer for every action taken

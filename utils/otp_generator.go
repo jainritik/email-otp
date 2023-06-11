@@ -13,6 +13,10 @@ func NewOTPGenerator() OTPGenerator {
 	return OTPGenerator{}
 }
 
+type OTPGeneratorInterface interface {
+	GenerateOTP() (string, error)
+}
+
 // GenerateOTP generates a 6-digit OTP and returns it along with any error
 func (og OTPGenerator) GenerateOTP() (string, error) {
 	rand.Seed(time.Now().UnixNano())

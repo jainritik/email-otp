@@ -18,12 +18,39 @@ const (
 
 // ValidateEmail validates if the given email address is in a valid format
 func ValidateEmail(email string) bool {
+	// Check if email length exceeds 100 characters
+	if len(email) > 100 {
+		return false
+	}
+
+	// Disallowed special characters in the user part
+	disallowedUserChars := `()[\];:@&=+$,/?#%`
+
 	// Regular expression for email validation
-	emailRegex := `^[a-zA-Z0-9.!#$%&'*+/=?^_` + "`" + `{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$`
+	emailRegex := "^[a-zA-Z0-9.!#$%'" + "`" + "*+/=?^_{|}~-]+" +
+		"@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*\\.org\\.sg$"
 
 	// Match email against the regex
 	match, _ := regexp.MatchString(emailRegex, email)
-	return match
+	if !match {
+		return false
+	}
+
+	// Check if subdomain is present
+	parts := strings.Split(email, "@")
+	domainParts := strings.Split(parts[1], ".")
+	if len(domainParts) != 3 || domainParts[len(domainParts)-3] != "dso" || domainParts[len(domainParts)-2] != "org" || domainParts[len(domainParts)-1] != "sg" {
+		return false
+	}
+
+	// Check if email contains any disallowed characters in the user part
+	for _, char := range disallowedUserChars {
+		if strings.Contains(parts[0], string(char)) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // IsEmailDomainAllowed checks if the domain of the given email address is allowed

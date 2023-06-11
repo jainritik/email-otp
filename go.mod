@@ -1,3 +1,5 @@
 module github.com/jainritik/email-otp
 
-go 1.19
+go 1.16
+
+require github.com/golang/mock v1.6.0

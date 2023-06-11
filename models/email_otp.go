@@ -14,10 +14,16 @@ type otpData struct {
 	timestamp time.Time
 }
 
-func NewOTPStorage() OTPStorage {
-	return OTPStorage{
+func NewOTPStorage() *OTPStorage {
+	return &OTPStorage{
 		otpMap: make(map[string]otpData),
 	}
+}
+
+type OTPStorageInterface interface {
+	StoreOTP(userEmail string, otp string, currentTime time.Time) error
+	GetOTP(userEmail string) (storedOTP string, createTime time.Time, exists bool, err error)
+	ClearOTP(userEmail string) error
 }
 
 func (storage *OTPStorage) StoreOTP(userEmail, otp string, timestamp time.Time) error {
