@@ -9,23 +9,6 @@ import (
 	"time"
 )
 
-//type EmailOTPController struct {
-//	emailService services.EmailServiceInterface
-//	otpGenerator utils.OTPGeneratorInterface
-//	otpStorage   models.OTPStorageInterface
-//	tries        map[string]int
-//	timer        *time.Timer
-//}
-//
-//func NewEmailOTPController(emailService services.EmailServiceInterface, otpGenerator utils.OTPGeneratorInterface, otpStorage models.OTPStorageInterface) *EmailOTPController {
-//	return &EmailOTPController{
-//		emailService: emailService,
-//		otpGenerator: otpGenerator,
-//		otpStorage:   otpStorage,
-//		tries:        make(map[string]int),
-//	}
-//}
-
 type EmailOTPController struct {
 	emailService services.EmailServiceInterface
 	otpGenerator utils.OTPGeneratorInterface
@@ -141,7 +124,7 @@ func (controller *EmailOTPController) CheckOTP(userEmail, enteredOTP string) uti
 	}
 
 	// Normalize entered OTP by removing leading zeros
-	enteredOTP = utils.NormalizeOTP(enteredOTP)
+	//enteredOTP = utils.NormalizeOTP(enteredOTP)
 
 	// Compare entered OTP with stored OTP
 	if storedOTP == enteredOTP {
