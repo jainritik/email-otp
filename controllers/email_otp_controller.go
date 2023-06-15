@@ -37,11 +37,6 @@ func (controller *EmailOTPController) GenerateOTP(userEmail string) utils.Status
 		return utils.STATUS_EMAIL_INVALID
 	}
 
-	// Check if email domain is allowed
-	if !utils.IsEmailDomainAllowed(userEmail) {
-		return utils.STATUS_EMAIL_INVALID
-	}
-
 	// Generate OTP
 	otp, err := controller.otpGenerator.GenerateOTP()
 	if err != nil {
@@ -77,11 +72,6 @@ func (controller *EmailOTPController) GenerateOTP(userEmail string) utils.Status
 func (controller *EmailOTPController) CheckOTP(userEmail, enteredOTP string) utils.StatusCode {
 	// Validate email address
 	if !utils.ValidateEmail(userEmail) {
-		return utils.STATUS_OTP_FAIL
-	}
-
-	// Check if email domain is allowed
-	if !utils.IsEmailDomainAllowed(userEmail) {
 		return utils.STATUS_OTP_FAIL
 	}
 

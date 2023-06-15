@@ -52,9 +52,3 @@ func ValidateEmail(email string) bool {
 
 	return true
 }
-
-// IsEmailDomainAllowed checks if the domain of the given email address is allowed
-func IsEmailDomainAllowed(email string) bool {
-	allowedDomain := "@dso.org.sg"
-	return strings.HasSuffix(email, allowedDomain)
-}

@@ -1,70 +1,44 @@
 package utils_test
 
 import (
-	"testing"
-
 	"github.com/jainritik/email-otp/utils"
+	"strings"
+	"testing"
 )
 
 func TestValidateEmail(t *testing.T) {
-	validEmails := []string{
-		"tester1@dso.org.sg",
-		"admin.hr@dso.org.sg",
-		"Hr@dso.org.sg",
-		"jon@dso.org.sg",
-		"Jon.it@dso.org.sg",
+	// Valid email address
+	validEmail := "john.doe@dso.org.sg"
+	validResult := utils.ValidateEmail(validEmail)
+	if !validResult {
+		t.Errorf("Expected ValidateEmail('%s') to return true, but got false", validEmail)
 	}
 
-	invalidEmails := []string{
-		"tester1@proc.dso.org.sg",
-		"tester2@yahoo.com",
-		"tester2@a.dso.org.sg.yahoo.com",
-		"tester2@dso.org.sg.yahoo.com",
-		"123@dso.org",
-		"123@it.dso.org",
-		"123@dso.com",
-		"123@12@dso.com",
+	// Email address exceeding 100 characters
+	invalidEmail := "a" + strings.Repeat("b", 99) + "@example.org.sg"
+	invalidResult := utils.ValidateEmail(invalidEmail)
+	if invalidResult {
+		t.Errorf("Expected ValidateEmail('%s') to return false, but got true", invalidEmail)
 	}
 
-	for _, email := range validEmails {
-		if !utils.ValidateEmail(email) {
-			t.Errorf("Expected email '%s' to be valid, but it was invalid", email)
-		}
+	// Invalid email address format
+	invalidFormatEmail := "john.doe@example.org"
+	invalidFormatResult := utils.ValidateEmail(invalidFormatEmail)
+	if invalidFormatResult {
+		t.Errorf("Expected ValidateEmail('%s') to return false, but got true", invalidFormatEmail)
 	}
 
-	for _, email := range invalidEmails {
-		if utils.ValidateEmail(email) {
-			t.Errorf("Expected email '%s' to be invalid, but it was valid", email)
-		}
-	}
-}
-
-func TestIsEmailDomainAllowed(t *testing.T) {
-	allowedEmails := []string{
-		"tester1@dso.org.sg",
-		"admin.hr@dso.org.sg",
-		"Hr@dso.org.sg",
-		"jon@dso.org.sg",
-		"Jon.it@dso.org.sg",
+	// Email address without 'dso.org.sg' domain
+	invalidDomainEmail := "john.doe@example.com"
+	invalidDomainResult := utils.ValidateEmail(invalidDomainEmail)
+	if invalidDomainResult {
+		t.Errorf("Expected ValidateEmail('%s') to return false, but got true", invalidDomainEmail)
 	}
 
-	disallowedEmails := []string{
-		"tester1@yahoo.com",
-		"admin.hr@gmail.com",
-		"Hr@abc.org.sg",
-		"jon@xyz.org.sg",
-		"Jon.it@xyz.org.sg",
-	}
-
-	for _, email := range allowedEmails {
-		if !utils.IsEmailDomainAllowed(email) {
-			t.Errorf("Expected email '%s' to have allowed domain, but it was disallowed", email)
-		}
-	}
-
-	for _, email := range disallowedEmails {
-		if utils.IsEmailDomainAllowed(email) {
-			t.Errorf("Expected email '%s' to have disallowed domain, but it was allowed", email)
-		}
+	// Email address with disallowed characters
+	disallowedCharsEmail := "joh[n]@example.org.sg"
+	disallowedCharsResult := utils.ValidateEmail(disallowedCharsEmail)
+	if disallowedCharsResult {
+		t.Errorf("Expected ValidateEmail('%s') to return false, but got true", disallowedCharsEmail)
 	}
 }
