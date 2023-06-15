@@ -17,7 +17,6 @@ type EmailServiceInterface interface {
 
 // SendEmail sends an email to the given address
 func (es EmailService) SendEmail(email, body string) error {
-	// Implementation for sending email
 	fmt.Println("Sending email to:", email)
 	fmt.Println("Email body:", body)
 	return nil

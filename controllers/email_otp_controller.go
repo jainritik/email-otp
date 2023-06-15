@@ -123,9 +123,6 @@ func (controller *EmailOTPController) CheckOTP(userEmail, enteredOTP string) uti
 		return utils.STATUS_OTP_TIMEOUT
 	}
 
-	// Normalize entered OTP by removing leading zeros
-	//enteredOTP = utils.NormalizeOTP(enteredOTP)
-
 	// Compare entered OTP with stored OTP
 	if storedOTP == enteredOTP {
 		// Clear stored OTP after successful verification

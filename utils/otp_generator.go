@@ -35,14 +35,3 @@ func (og OTPGenerator) GenerateOTP() (string, error) {
 
 	return otpString, nil
 }
-
-// NormalizeOTP removes leading zeros from the OTP
-//func NormalizeOTP(otp string) string {
-//	// Remove leading zeros
-//	i, err := strconv.Atoi(otp)
-//	if err != nil {
-//		return otp
-//	}
-//	normalizedOTP := strconv.Itoa(i)
-//	return normalizedOTP
-//}
